@@ -1,0 +1,257 @@
+<!DOCTYPE html> 
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Músicas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+/* style.css */
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  color: #000000;
+}
+
+a {
+  text-decoration: none;
+  color: #333;
+}
+
+/* HEADER */
+header {
+  background-color: #000;
+  color: #fff;
+  padding: 20px 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  margin-right: 20px;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+nav li {
+  margin-right: 20px;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.search {
+  margin-left: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 200px;
+}
+
+.search input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+}
+
+.user {
+  margin-left: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.user img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+/* MAIN */
+main {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+main .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.playlist-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.playlist {
+  margin: 20px;
+  width: 200px;
+  background-color: #fff;
+  border: 1px solid #ffffff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.playlist img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 5px 5px 0 
+}
+    </style>
+</head>
+
+<body>
+    <!-- Cabeçalho com o botão de "Adicionar ao Banco de Dados" -->
+    <header>
+        <div class="container">
+            <img src="imagem.png" alt="Strayth" height="20%" width="10%">
+            <nav>
+                <ul>
+                    <li><a href="../principal/principal.html">PLAYLISTS</a></li>
+                    <li><a href="../playlist/playlist.html">EM ALTA</a></li>
+                    <li><a href="../inicial/emAlta.html">PÁGINA INICIAL</a></li>
+                    <li><a href="../cadastro de msc/cadastro.html">CADASTRO DE MÚSICA</a></li>
+                </ul>
+            </nav>
+            <div class="search">
+                <input type="text" placeholder="PESQUISE">
+            </div>
+            <button id="accessDbBtn" class="add-to-db-btn">Acesse seus Dados</button>
+        </div>
+    </header>
+
+    <!-- Conteúdo da página principal -->
+    <div class="content">
+        <h1>Reprodutor de Música - Playlist</h1>
+        <div id="musicContainer">
+            <p>Insira o link da música (MP3) abaixo:</p>
+            <input type="text" id="musicLink" placeholder="Cole o link da música aqui" />
+            <button id="addButton">Adicionar Música</button>
+
+            <ul id="playlist"></ul>
+            <div class="button-container">
+                <button id="nextButton" style="display:none;">Próxima Música</button>
+                <button id="clearButton" style="display:none;">Limpar Música</button>
+            </div>            
+            <div id="musicPlayer"></div>
+            <button id="nextButton" style="display:none;">Próxima Música</button>
+        </div>
+
+        <script>
+const playlist = [];
+let currentSongIndex = -1;
+let currentAudio = null; // Para armazenar a referência do áudio atual
+const musicPlayer = document.getElementById('musicPlayer');
+const musicImage = document.getElementById('musicImage');
+
+// Adicionando a música à playlist
+document.getElementById('addButton').addEventListener('click', function() {
+    const link = document.getElementById('musicLink').value;
+    if (link) {
+        playlist.push(link);
+        updatePlaylistDisplay();
+        document.getElementById('musicLink').value = ''; // Limpa o campo
+    }
+});
+
+// Função para exibir a playlist
+function updatePlaylistDisplay() {
+    const playlistElement = document.getElementById('playlist');
+    playlistElement.innerHTML = '';
+    playlist.forEach((song, index) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `Música ${index + 1}`;
+        const playButton = document.createElement('button');
+        playButton.textContent = 'Tocar';
+        playButton.addEventListener('click', () => playSong(index));
+        listItem.appendChild(playButton);
+        playlistElement.appendChild(listItem);
+    });
+}
+
+// Função para tocar a música
+function playSong(index) {
+    currentSongIndex = index;
+    const link = playlist[index];
+    musicPlayer.innerHTML = ''; // Limpa o reprodutor de áudio
+
+    const audio = document.createElement('audio');
+    audio.controls = true;
+    audio.autoplay = true;
+
+    const source = document.createElement('source');
+    source.src = link;
+    source.type = 'audio/mpeg';
+    audio.appendChild(source);
+    musicPlayer.appendChild(audio);
+
+    currentAudio = audio; // Armazena a referência do áudio atual
+
+    audio.onended = playNextSong; // Toca a próxima música automaticamente
+    document.getElementById('nextButton').style.display = 'inline'; // Exibe o botão "Próxima Música"
+    document.getElementById('clearButton').style.display = 'inline'; // Exibe o botão "Limpar Música"
+}
+
+// Função para tocar a próxima música
+function playNextSong() {
+    if (currentSongIndex < playlist.length - 1) {
+        playSong(currentSongIndex + 1);
+    } else {
+        currentSongIndex = -1; // Reseta para o início
+        musicPlayer.innerHTML = ''; // Limpa o reprodutor
+        musicImage.style.display = 'none'; // Esconde a imagem
+        document.getElementById('nextButton').style.display = 'none'; // Esconde o botão "Próxima Música"
+        document.getElementById('clearButton').style.display = 'none'; // Esconde o botão "Limpar Música"
+    }
+}
+
+// Função para limpar a música (parar e limpar o reprodutor)
+document.getElementById('clearButton').addEventListener('click', function() {
+    if (currentAudio) {
+        currentAudio.pause(); // Pausa a música
+        currentAudio.currentTime = 0; // Reseta a posição do áudio
+    }
+    musicPlayer.innerHTML = ''; // Limpa o reprodutor
+    musicImage.style.display = 'none'; // Esconde a imagem
+    document.getElementById('nextButton').style.display = 'none'; // Esconde o botão "Próxima Música"
+    document.getElementById('clearButton').style.display = 'none'; // Esconde o botão "Limpar Música"
+});
+
+            // Adicionando a funcionalidade do botão "Acesse seus Dados"
+            document.getElementById('accessDbBtn').addEventListener('click', function() {
+                const dbLink = "file:///C:/Users/matheus_freiberger/Desktop/halloween%203/HALLOWEEN2/TteuMathz-/NOVO/n%C3%A3o/REGISTRO/armazenamento.html"; 
+                window.location.href = dbLink; // Redireciona o usuário
+            });
+
+            
+        </script>
+    </div

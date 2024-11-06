@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./cadastro.css">
+    <title>Cadastro de Músicas</title>
+    <script>
+        const playlist = [];
+        let currentSongIndex = -1;
+
+        function cadastrarMusica() {
+            const artista = document.getElementById('artist').value;
+            const genero = document.getElementById('genre').value;
+            const duracao = document.getElementById('duration').value;
+            const link = document.getElementById('link').value;
+
+            const nomeMusica = link.substring(link.lastIndexOf('/') + 1); // Extrai o nome da música
+            playlist.push({ name: nomeMusica, artist: artista, genre: genero, duration: duracao, link: link });
+            updatePlaylistDisplay();
+
+            // Limpa o formulário após o cadastro
+            document.getElementById('musicForm').reset();
+        }
+
+        function updatePlaylistDisplay(filter = '') {
+            const playlistElement = document.getElementById('musicList');
+            playlistElement.innerHTML = '';
+            const filteredPlaylist = playlist.filter(song =>
+                song.name.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            filteredPlaylist.forEach((song, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${song.name} - ${song.artist} (${song.genre}, ${song.duration} min)`;
+                const playButton = document.createElement('button');
+                playButton.textContent = 'Tocar';
+                playButton.addEventListener('click', () => playSong(index));
+                listItem.appendChild(playButton);
+                playlistElement.appendChild(listItem);
+            });
+        }
+
+        function playSong(index) {
+            currentSongIndex = index;
+            const link = playlist[index].link;
+            const musicPlayer = document.getElementById('musicPlayer');
+            musicPlayer.innerHTML = '';
+
+            // Cria um iframe para o SoundCloud
+            const embed = `<iframe width="100%" height="166" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=${link}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false"></iframe>`;
+            musicPlayer.innerHTML = embed;
+
+            document.getElementById('nextButton').style.display = 'inline';
+        }
+
+        function playNextSong() {
+            if (currentSongIndex < playlist.length - 1) {
+                playSong(currentSongIndex + 1);
+            } else {
+                currentSongIndex = -1;
+                document.getElementById('musicPlayer').innerHTML = '';
+                document.getElementById('nextButton').style.display = 'none';
+            }
+        }
+
+        function clearPlaylist() {
+            playlist.length = 0; // Limpa a playlist
+            updatePlaylistDisplay();
+            document.getElementById('musicPlayer').innerHTML = ''; // Limpa o player
+        }
+
+        function searchMusic() {
+            const searchQuery = document.getElementById('searchInput').value;
+            updatePlaylistDisplay(searchQuery); // Chama a função com o parâmetro de pesquisa
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <img src="imagem.png" alt="Strayth" height="10%" width="10%">
+            <nav>
+                <ul>
+                    <li><a href="../principal/principal.html">PLAYLISTS</a></li>
+                    <li><a href="../playlist/playlist.html">EM ALTA</a></li>
+                    <li><a href="../inicial/emAlta.html">PÁGINA INICIAL</a></li>
+                    <li><a href="../cadastro de msc/cadastro.html">CADASTRO DE MÚSICA</a></li>
+                </ul>
+            </nav>
+            <div class="search">
+                <input type="text" id="searchInput" placeholder="PESQUISE" oninput="searchMusic()">
+            </div>
+            <div class="user">
+                <img src="user.jpg" alt="Foto de Perfil">
+            </div>
+        </div>
+    </header>
+
+    <h1>Cadastro de Músicas</h1>
+    <form id="musicForm" onsubmit="event.preventDefault(); cadastrarMusica();">
+        <input type="text" id="artist" placeholder="Artista" required>
+        <input type="text" id="genre" placeholder="Gênero" required>
+        <input type="number" id="duration" placeholder="Duração (min)" required>
+        <input type="text" id="link" placeholder="Link do SoundCloud" required />
+        <button type="submit">Adicionar Música</button>
+    </form>
+
+    <h2>Músicas Cadastradas</h2>
+    <ul id="musicList"></ul>
+    
+    <div id="musicPlayer"></div>
+    <button id="nextButton" style="display:none;">Próxima Música</button>
+    <button onclick="clearPlaylist()">Limpar Playlist</button>
+
+</body>
+</html>
